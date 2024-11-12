@@ -3,6 +3,9 @@
 #include <string>
 #include <vector>
 #include <cstdlib>
+#include <algorithm>
+#include <cstdio>
+#include <filesystem>
 
 using namespace std;
 
@@ -23,6 +26,25 @@ public:
         auto it = find(playlist.begin(), playlist.end(), filename);
         if (it != playlist.end())
         {
+            // 파일 존재 여부 확인
+            if (ifstream(filename))
+            {
+                // 파일 삭제
+                if (remove(filename.c_str()) == 0) // 파일 삭제 성공 시
+                {
+                    cout << "Deleted file: " << filename << endl;
+                }
+                else
+                {
+                    cout << "Failed to delete file: " << filename << endl;
+                }
+            }
+            else
+            {
+                cout << "File not found: " << filename << endl;
+            }
+
+            // 플레이리스트에서 항목 제거
             playlist.erase(it);
             cout << "Removed from playlist: " << filename << endl;
         }
@@ -84,8 +106,8 @@ int main()
         {
             player.showPlaylist();
 
-            cout << "1. 플레이리스트에 노래 추가하기\n";
-            cout << "2. 플레이리스트에 있는 노래 삭제하기\n";
+            cout << "2. 플레이리스트에 노래 추가하기\n";
+            cout << "3. 플레이리스트에 있는 노래 삭제하기\n";
             cout << "원하시는 항목을 선택하여 입력해주세요: ";
             int subChoice;
             cin >> subChoice;
