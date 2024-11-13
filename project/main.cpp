@@ -32,31 +32,31 @@ public:
                 // 파일 삭제
                 if (remove(filename.c_str()) == 0) // 파일 삭제 성공 시
                 {
-                    cout << "Deleted file: " << filename << endl;
+                    cout << "다음 파일을 삭제하였습니다: " << filename << endl;
                 }
                 else
                 {
-                    cout << "Failed to delete file: " << filename << endl;
+                    cout << "다음 파일 삭제에 실패했습니다: " << filename << endl;
                 }
             }
             else
             {
-                cout << "File not found: " << filename << endl;
+                cout << "다음 파일을 찾을 수 없습니다: " << filename << endl;
             }
 
             // 플레이리스트에서 항목 제거
             playlist.erase(it);
-            cout << "Removed from playlist: " << filename << endl;
+            cout << "다음 파일이 플레이리스트에서 제거되었습니다: " << filename << endl;
         }
         else
         {
-            cout << "File not found in playlist: " << filename << endl;
+            cout << "다음 파일을 플레이리스트에서 찾지 못했습니다: " << filename << endl;
         }
     }
 
     void showPlaylist() const
     {
-        cout << "Current Playlist:" << endl;
+        cout << "현재 플레이리스트:" << endl;
         for (const auto &file : playlist)
         {
             cout << file << endl;
