@@ -5,9 +5,6 @@
 #include <cstdlib>
 #include <algorithm>
 #include <cstdio>
-#include <thread>
-
-// 일단 기능에 대한 항목부터 다시 정리하고 해당 항목들을 채워나가는 형식으로 개발하기
 
 using namespace std;
 
@@ -64,16 +61,6 @@ public:
             cout << file << endl;
         }
     }
-
-    void playPlaylist() const
-    {
-        for (const auto &file : playlist)
-        {
-            cout << "재생 중: " << file << endl;
-            string command = "ffplay -nodisp -autoexit \"" + file + "\"";
-            system(command.c_str());
-        }
-    }
 };
 
 string downloadAudio(const string &url)
@@ -106,9 +93,6 @@ int main()
     while (true)
     {
         cout << "1. 플레이리스트 확인하기\n";
-        cout << "2. 플레이리스트에 노래 추가하기\n";
-        cout << "3. 플레이리스트에 있는 노래 삭제하기\n";
-        cout << "4. 플레이리스트 노래 재생하기\n";
         cout << "0. 종료하기\n";
         cout << "원하시는 항목을 선택하여 입력해주세요: ";
         int choice;
@@ -121,40 +105,37 @@ int main()
         if (choice == 1)
         {
             player.showPlaylist();
-        }
-        else if (choice == 2)
-        {
-            cout << "다운로드할 유튜브 영상의 URL을 입력하세요: ";
-            getline(cin, url);
 
-            string filename = downloadAudio(url);
-            if (!filename.empty())
+            cout << "2. 플레이리스트에 노래 추가하기\n";
+            cout << "3. 플레이리스트에 있는 노래 삭제하기\n";
+            cout << "원하시는 항목을 선택하여 입력해주세요: ";
+            int subChoice;
+            cin >> subChoice;
+            cin.ignore(); // 버퍼 비우기
+
+            if (subChoice == 2)
             {
-                player.addToPlaylist(filename);
+                cout << "다운로드할 유튜브 영상의 URL을 입력하세요: ";
+                getline(cin, url);
+
+                string filename = downloadAudio(url);
+                if (!filename.empty())
+                {
+                    player.addToPlaylist(filename);
+                    player.showPlaylist();
+                }
+                else
+                {
+                    cout << "파일 이름을 가져오는 데 실패했습니다." << endl;
+                }
+            }
+            else if (subChoice == 3)
+            {
+                cout << "삭제할 노래의 이름을 입력하세요: ";
+                string filenameToRemove;
+                getline(cin, filenameToRemove);
+                player.removeFromPlaylist(filenameToRemove);
                 player.showPlaylist();
-            }
-            else
-            {
-                cout << "파일 이름을 가져오는 데 실패했습니다." << endl;
-            }
-        }
-        else if (choice == 3)
-        {
-            cout << "삭제할 노래의 이름을 입력하세요: ";
-            string filenameToRemove;
-            getline(cin, filenameToRemove);
-            player.removeFromPlaylist(filenameToRemove);
-            player.showPlaylist();
-        }
-        else if (choice == 4)
-        {
-            if (player.showPlaylist().empty())
-            {
-                cout << "플레이리스트가 비어 있습니다." << endl;
-            }
-            else
-            {
-                player.playPlaylist();
             }
         }
     }
