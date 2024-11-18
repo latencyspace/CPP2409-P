@@ -1,143 +1,96 @@
 #include <iostream>
-#include <fstream>
 #include <string>
-#include <vector>
-#include <cstdlib>
-#include <algorithm>
-#include <cstdio>
+#include <sys/ioctl.h>
+#include <unistd.h>
+#include <signal.h>
+#include <cstring>
 
 using namespace std;
 
-class AudioPlayer
+volatile sig_atomic_t resize_flag = 0;
+
+void handleResize(int sig)
 {
-private:
-    vector<string> playlist;
+    resize_flag = 1; // 신호가 발생하면 플래그를 설정
+}
 
-public:
-    void addToPlaylist(const string &filename)
-    {
-        playlist.push_back(filename);
-        cout << "Added to playlist: " << filename << endl;
-    }
-
-    void removeFromPlaylist(const string &filename)
-    {
-        auto it = find(playlist.begin(), playlist.end(), filename);
-        if (it != playlist.end())
-        {
-            // 파일 존재 여부 확인
-            if (ifstream(filename))
-            {
-                // 파일 삭제
-                if (remove(filename.c_str()) == 0) // 파일 삭제 성공 시
-                {
-                    cout << "다음 파일을 삭제하였습니다: " << filename << endl;
-                }
-                else
-                {
-                    cout << "다음 파일 삭제에 실패했습니다: " << filename << endl;
-                }
-            }
-            else
-            {
-                cout << "다음 파일을 찾을 수 없습니다: " << filename << endl;
-            }
-
-            // 플레이리스트에서 항목 제거
-            playlist.erase(it);
-            cout << "다음 파일이 플레이리스트에서 제거되었습니다: " << filename << endl;
-        }
-        else
-        {
-            cout << "다음 파일을 플레이리스트에서 찾지 못했습니다: " << filename << endl;
-        }
-    }
-
-    void showPlaylist() const
-    {
-        cout << "현재 플레이리스트:" << endl;
-        for (const auto &file : playlist)
-        {
-            cout << file << endl;
-        }
-    }
-};
-
-string downloadAudio(const string &url)
+void displayMenu(const string &currentSong)
 {
-    // yt-dlp 명령어를 사용하여 MP4 형식으로 다운로드
-    string command = "yt-dlp -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]' --merge-output-format mp4 -o '%(title)s.%(ext)s' " + url;
-    system(command.c_str());
+    // 콘솔 창의 너비 가져오기
+    struct winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    int width = w.ws_col; // 현재 창의 너비
 
-    // 다운로드한 파일 이름 읽기
-    string filename = ""; // 파일 이름을 초기화
-    string outputFile = "output.txt";
-    ifstream infile(outputFile);
-    if (infile)
-    {
-        getline(infile, filename);
-    }
-    infile.close();
+    // 동적으로 = 문자 생성
+    string line(width, '=');
 
-    // output.txt 파일 삭제 (선택 사항)
-    remove(outputFile.c_str());
-
-    return filename;
+    cout << "\033[H\033[J"; // 화면 지우기
+    cout << line << "\n";
+    cout << "Now playing: " << currentSong << "\n";
+    cout << "이전 곡 재생하기 (prev)\n";
+    cout << "음악 재생/일시정지 (p)\n";
+    cout << "다음 곡 재생하기 (next)\n";
+    cout << line << "\n";
+    cout << "1. 플레이리스트 확인하기\n";
+    cout << "0. 프로그램 종료\n";
+    cout << line << "\n";
+    cout << "실행하고자 하는 기능에 대한 문자를 입력하세요: "; // 사용자 입력을 받는 라인
 }
 
 int main()
 {
-    AudioPlayer player;
-    string url;
+    string currentSong = "예시 음악 제목"; // 현재 음악 제목을 여기에 설정
+    string userInput;                      // 사용자 입력 변수
+
+    // SIGWINCH 신호를 처리하기 위한 핸들러 등록
+    struct sigaction sa;
+    memset(&sa, 0, sizeof(sa));
+    sa.sa_handler = handleResize;
+    sigaction(SIGWINCH, &sa, nullptr);
+
+    // 프로그램 시작 시 화면 출력
+    displayMenu(currentSong);
 
     while (true)
     {
-        cout << "1. 플레이리스트 확인하기\n";
-        cout << "0. 종료하기\n";
-        cout << "원하시는 항목을 선택하여 입력해주세요: ";
-        int choice;
-        cin >> choice;
-        cin.ignore(); // 버퍼 비우기
-
-        if (choice == 0)
-            break;
-
-        if (choice == 1)
+        if (resize_flag)
         {
-            player.showPlaylist();
-
-            cout << "2. 플레이리스트에 노래 추가하기\n";
-            cout << "3. 플레이리스트에 있는 노래 삭제하기\n";
-            cout << "원하시는 항목을 선택하여 입력해주세요: ";
-            int subChoice;
-            cin >> subChoice;
-            cin.ignore(); // 버퍼 비우기
-
-            if (subChoice == 2)
-            {
-                cout << "다운로드할 유튜브 영상의 URL을 입력하세요: ";
-                getline(cin, url);
-
-                string filename = downloadAudio(url);
-                if (!filename.empty())
-                {
-                    player.addToPlaylist(filename);
-                    player.showPlaylist();
-                }
-                else
-                {
-                    cout << "파일 이름을 가져오는 데 실패했습니다." << endl;
-                }
-            }
-            else if (subChoice == 3)
-            {
-                cout << "삭제할 노래의 이름을 입력하세요: ";
-                string filenameToRemove;
-                getline(cin, filenameToRemove);
-                player.removeFromPlaylist(filenameToRemove);
-                player.showPlaylist();
-            }
+            resize_flag = 0;          // 플래그 초기화
+            displayMenu(currentSong); // 화면 갱신
         }
+
+        // 사용자 입력 처리
+        getline(cin, userInput); // 사용자 입력 받기
+
+        // 입력에 따라 행동 결정
+        if (userInput == "0")
+        {
+            cout << "프로그램을 종료합니다.\n";
+            break; // 프로그램 종료
+        }
+        else if (userInput == "1")
+        {
+            cout << "플레이리스트를 확인하는 기능은 아직 구현되지 않았습니다.\n";
+        }
+        else if (userInput == "prev")
+        {
+            cout << "이전 곡 재생 기능은 아직 구현되지 않았습니다.\n";
+        }
+        else if (userInput == "p")
+        {
+            cout << "재생/일시정지 기능은 아직 구현되지 않았습니다.\n";
+        }
+        else if (userInput == "next")
+        {
+            cout << "다음 곡 재생 기능은 아직 구현되지 않았습니다.\n";
+        }
+        else
+        {
+            cout << "알 수 없는 명령입니다. 다시 입력하세요.\n";
+        }
+
+        // 화면을 다시 출력
+        displayMenu(currentSong);
     }
 
     return 0;
