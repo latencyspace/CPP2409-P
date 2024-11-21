@@ -1,9 +1,12 @@
+// /usr/bin/g++ -std=c++14 -fdiagnostics-color=always -g /Users/latency/Desktop/Dev/C++/CPP2409-P/test/test.cpp -o /Users/latency/Desktop/Dev/C++/CPP2409-P/test/test
+
 #include <iostream>
 #include <string>
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <signal.h>
 #include <cstring>
+#include <cstdlib> // system() 사용을 위한 헤더 추가
 
 using namespace std;
 
@@ -16,80 +19,82 @@ void handleResize(int sig)
 
 void displayMenu(const string &currentSong)
 {
-    // 콘솔 창의 너비 가져오기
     struct winsize w;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-    int width = w.ws_col; // 현재 창의 너비
+    int width = w.ws_col;
 
-    // 동적으로 = 문자 생성
     string line(width, '=');
 
     cout << "\033[H\033[J"; // 화면 지우기
     cout << line << "\n";
     cout << "Now playing: " << currentSong << "\n";
-    cout << "이전 곡 재생하기 (prev)\n";
-    cout << "음악 재생/일시정지 (p)\n";
-    cout << "다음 곡 재생하기 (next)\n";
     cout << line << "\n";
-    cout << "1. 플레이리스트 확인하기\n";
+    cout << "1. 이전 곡\n";
+    cout << "2. 재생/일시정지\n";
+    cout << "3. 다음 곡\n";
+    cout << "4. 플레이리스트\n";
     cout << "0. 프로그램 종료\n";
     cout << line << "\n";
-    cout << "실행하고자 하는 기능에 대한 문자를 입력하세요: "; // 사용자 입력을 받는 라인
+    cout << "무엇을 실행하시겠어요?: ";
+}
+
+void setupEnvironment()
+{
+    system("python3 -m venv path/to/venv");
+    system("source path/to/venv/bin/activate");
+    system("path/to/venv/bin/pip install yt-dlp");
 }
 
 int main()
 {
-    string currentSong = "예시 음악 제목"; // 현재 음악 제목을 여기에 설정
-    string userInput;                      // 사용자 입력 변수
+    setupEnvironment(); // 환경 설정 함수 호출
 
-    // SIGWINCH 신호를 처리하기 위한 핸들러 등록
+    string currentSong = "예시 음악 제목";
+    string userInput;
+
     struct sigaction sa;
     memset(&sa, 0, sizeof(sa));
     sa.sa_handler = handleResize;
     sigaction(SIGWINCH, &sa, nullptr);
 
-    // 프로그램 시작 시 화면 출력
     displayMenu(currentSong);
 
     while (true)
     {
         if (resize_flag)
         {
-            resize_flag = 0;          // 플래그 초기화
-            displayMenu(currentSong); // 화면 갱신
+            resize_flag = 0;
+            displayMenu(currentSong);
         }
 
-        // 사용자 입력 처리
-        getline(cin, userInput); // 사용자 입력 받기
+        getline(cin, userInput);
 
-        // 입력에 따라 행동 결정
-        if (userInput == "0")
+        if (userInput == "1")
         {
-            cout << "프로그램을 종료합니다.\n";
-            break; // 프로그램 종료
+            cout << "이전 곡 기능 실행\n";
         }
-        else if (userInput == "1")
+        else if (userInput == "2")
         {
-            cout << "플레이리스트를 확인하는 기능은 아직 구현되지 않았습니다.\n";
+            cout << "재생/일시정지 기능 실행\n";
         }
-        else if (userInput == "prev")
+        else if (userInput == "3")
         {
-            cout << "이전 곡 재생 기능은 아직 구현되지 않았습니다.\n";
+            cout << "다음 곡 기능 실행\n";
         }
-        else if (userInput == "p")
+        else if (userInput == "4")
         {
-            cout << "재생/일시정지 기능은 아직 구현되지 않았습니다.\n";
+            cout << "플레이리스트 기능 실행\n";
         }
-        else if (userInput == "next")
+        else if (userInput == "0")
         {
-            cout << "다음 곡 재생 기능은 아직 구현되지 않았습니다.\n";
+            cout << "프로그램 종료\n";
+            break;
         }
         else
         {
-            cout << "알 수 없는 명령입니다. 다시 입력하세요.\n";
+            cout << "잘못된 입력입니다. 다시 시도하세요.\n";
         }
 
-        // 화면을 다시 출력
         displayMenu(currentSong);
     }
 
