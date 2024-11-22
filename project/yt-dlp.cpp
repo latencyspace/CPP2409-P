@@ -6,7 +6,7 @@ using namespace std;
 int main()
 {
     string url;
-    cout << "다운로드할 유튜브 영상의 URL을 입력하세요: ";
+    cout << "듣고 싶은 음악의 유튜브 URL을 입력하세요: ";
     getline(cin, url);
 
     // yt-dlp 명령어를 호출
