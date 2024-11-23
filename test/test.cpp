@@ -97,46 +97,52 @@ void playSong(const string &filename, string &currentSong)
     }
 }
 
-void installHomebrew()
-{
-    // Homebrew가 설치되어 있는지 확인하고 설치
-    int result = system("command -v brew");
-    if (result != 0)
-    {
-        cout << "Homebrew가 설치되어 있지 않습니다. 설치 중...\n";
-        system("/bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\"");
-    }
-}
+// void installHomebrew()
+// {
+//     // Homebrew가 설치되어 있는지 확인하고 설치
+//     int result = system("command -v brew");
+//     if (result != 0)
+//     {
+//         cout << "Homebrew가 설치되어 있지 않습니다. 설치 중...\n";
+//         system("/bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\"");
+//     }
+// }
 
-void installMpg123()
-{
-    // mpg123가 설치되어 있는지 확인하고 설치
-    int result = system("command -v mpg123");
-    if (result != 0)
-    {
-        cout << "mpg123가 설치되어 있지 않습니다. 설치 중...\n";
-        system("brew install mpg123");
-    }
-}
+// void installMpg123()
+// {
+//     // mpg123가 설치되어 있는지 확인하고 설치
+//     int result = system("command -v mpg123");
+//     if (result != 0)
+//     {
+//         cout << "mpg123가 설치되어 있지 않습니다. 설치 중...\n";
+//         system("brew install mpg123");
+//     }
+// }
 
-void setupEnvironment()
-{
-    // 가상 환경 생성
-    system("python3 -m venv path/to/venv");
+// void setupEnvironment()
+// {
+//     // 가상 환경 생성
+//     system("python3 -m venv path/to/venv");
 
-    // 가상 환경 활성화 (Linux/macOS)
-    system("source path/to/venv/bin/activate");
+//     // 가상 환경 활성화 (Linux/macOS)
+//     system("source path/to/venv/bin/activate");
 
-    // yt-dlp 설치
-    system("path/to/venv/bin/pip install yt-dlp");
+//     // yt-dlp 설치
+//     system("path/to/venv/bin/pip install yt-dlp");
 
-    installHomebrew(); // Homebrew 설치 확인 및 설치
-    installMpg123();   // mpg123 설치 확인 및 설치
-}
+//     // Homebrew 설치 및 mpg123 설치
+//     system("if ! command -v brew &> /dev/null; then "
+//            "echo 'Homebrew가 설치되어 있지 않습니다. 설치 중...'; "
+//            "/bin/bash -c \"$(curl -fsSL \"; "
+//            "fi");
+
+//     // mpg123 설치
+//     system("brew install mpg123");
+// }
 
 int main()
 {
-    setupEnvironment();
+    // setupEnvironment();
 
     string currentSong = ""; // 현재 재생 중인 음악 제목
     string userInput;
