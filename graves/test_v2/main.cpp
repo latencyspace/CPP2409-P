@@ -85,8 +85,41 @@ string downloadAudio(const string &url)
     return filename;
 }
 
+void installHomebrew()
+{
+    int result = system("command -v brew");
+    if (result != 0)
+    {
+        cout << "Homebrew가 설치되어 있지 않습니다. 설치 중...\n";
+        system("/bin/bash -c \"$(curl -fsSL \"");
+    }
+}
+
+void installMpg123()
+{
+    int result = system("command -v mpg123");
+    if (result != 0)
+    {
+        cout << "mpg123가 설치되어 있지 않습니다. 설치 중...\n";
+        system("brew install mpg123");
+    }
+}
+
+void setupEnvironment()
+{
+    system("python3 -m venv path/to/venv");
+    system("source path/to/venv/bin/activate");
+    system("path/to/venv/bin/pip install yt-dlp");
+    installHomebrew();
+    installMpg123();
+}
+
+;
+
 int main()
 {
+    setupEnvironment();
+
     AudioPlayer player;
     string url;
 
