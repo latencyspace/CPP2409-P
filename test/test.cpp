@@ -12,6 +12,8 @@
 using namespace std;
 
 atomic<bool> isPlaying(false);
+string nowPlaying = "없음";        // 전역 변수로 선언
+string playtime = "00:00 / 00:00"; // 전역 변수로 선언
 
 void checkAndInstallDependencies()
 {
@@ -72,7 +74,8 @@ void displayMenu(const string &nowPlaying, const string &playtime)
 
 void playSong(const string &song)
 {
-    isPlaying = true; // 노래 재생 상태 설정
+    isPlaying = true;  // 노래 재생 상태 설정
+    nowPlaying = song; // 현재 재생 중인 노래 정보 업데이트
     string command = "yt-dlp -x --audio-format mp3 " + song + " --exec \"mpv {}\"";
     system(command.c_str());
     isPlaying = false; // 노래 재생이 끝나면 상태 변경
@@ -127,12 +130,10 @@ int main()
     checkAndInstallDependencies(); // 의존성 확인 및 설치
 
     vector<string> playlist;
-    string nowPlaying = "없음";
-    string playtime = "00:00 / 00:00";
 
     while (true)
     {
-        displayMenu(nowPlaying, playtime);
+        displayMenu(nowPlaying, playtime); // nowPlaying을 사용하여 현재 재생 중인 노래 표시
         int choice;
         cout << "선택하세요: ";
         cin >> choice;
@@ -180,12 +181,6 @@ int main()
         default:
             cout << "잘못된 선택입니다." << endl;
             break;
-        }
-
-        // 현재 재생 중인 노래 업데이트
-        if (isPlaying)
-        {
-            nowPlaying = playlist.empty() ? "없음" : playlist[0]; // 현재 재생 중인 노래 정보 업데이트
         }
     }
 }

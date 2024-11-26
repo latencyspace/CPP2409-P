@@ -1,3 +1,5 @@
+// /usr/bin/g++ -std=c++14 -fdiagnostics-color=always -g /Users/latency/Desktop/Dev/C++/CPP2409-P/test/test.cpp -o /Users/latency/Desktop/Dev/C++/CPP2409-P/test/test
+
 #include <iostream>
 #include <fstream>
 #include <vector>
