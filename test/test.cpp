@@ -1,5 +1,7 @@
 // /usr/bin/g++ -std=c++14 -fdiagnostics-color=always -g /Users/latency/Desktop/Dev/C++/CPP2409-P/test/test.cpp -o /Users/latency/Desktop/Dev/C++/CPP2409-P/test/test
 
+// /usr/bin/g++ -std=c++14 -fdiagnostics-color=always -g /Users/latency/Desktop/Dev/C++/CPP2409-P/test/test.cpp -o /Users/latency/Desktop/Dev/C++/CPP2409-P/test/test
+
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -135,7 +137,7 @@ int main()
     {
         displayMenu(nowPlaying, playtime); // nowPlaying을 사용하여 현재 재생 중인 노래 표시
         int choice;
-        cout << "선택하세요: ";
+        cout << "사용하려는 기능에 대한 번호를 입력해주세요: ";
         cin >> choice;
 
         switch (choice)
@@ -146,6 +148,12 @@ int main()
             {
                 thread player(songPlayerThread, ref(playlist)); // 노래 재생 스레드 시작
                 player.detach();                                // 스레드를 분리하여 메인 스레드와 독립적으로 실행
+                // 위 코드로 스레드 분리해서 실행하다보니까 Now playing: & Playtime: 부분이 동적으로 값을 못받아오는 것 같음
+
+                displayMenu(nowPlaying, playtime); // nowPlaying을 사용하여 현재 재생 중인 노래 표시
+                int choice;
+                cout << "사용하려는 기능에 대한 번호를 입력해주세요: ";
+                cin >> choice;
             }
             else
             {
@@ -159,6 +167,7 @@ int main()
             {
                 cout << i + 1 << ". " << playlist[i] << endl;
             }
+            cout << "이전으로 돌아가려면 'Enter'를 입력하세요." << endl;
             cin.ignore();
             cin.get(); // 대기
             break;
