@@ -13,20 +13,58 @@ private:
         clear
                 horizontalFill
                     horizontalBlank
-                        horizontalFill
-                            cout
-            << "Welcome to the Music Player!" << endl;
-        cout << "Press SPACE to exit or any key to continue..." << endl;
-        input = getchar();
-        if (input == ' ')
+                        cout
+            << "*       음악 플레이어에 오신 것을 환영합니다!      *" << endl;
+        horizontalBlank
+                horizontalFill
+                    cout
+            << "'L' 키를 눌러 노래 목록을 확인하거나, '스페이스' 키를 눌러 종료하세요." << endl;
+    }
+
+    void listSongs()
+    {
+        clear
+                horizontalFill
+                    cout
+            << "*              사용 가능한 노래 목록               *" << endl;
+        horizontalFill
+
+            vector<string>
+                files = getFileList();
+        if (files.empty())
         {
-            clear;
-            exit(0);
+            cout << "현재 './songs/' 디렉토리에 노래가 없습니다." << endl;
         }
+        else
+        {
+            for (size_t i = 0; i < files.size(); ++i)
+            {
+                cout << i + 1 << ". " << files[i] << endl;
+            }
+        }
+
+        cout << "\n계속하려면 아무 키나 누르세요... " << endl;
+        getchar();
     }
 
 public:
-    run() { border(); }
+    run()
+    {
+        while (true)
+        {
+            border();
+            input = getchar();
+            if (input == ' ')
+            {
+                clear;
+                exit(0);
+            }
+            else if (input == 'L' || input == 'l')
+            {
+                listSongs();
+            }
+        }
+    }
 };
 
 int main(void)

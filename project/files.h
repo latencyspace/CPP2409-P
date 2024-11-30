@@ -2,11 +2,44 @@
 #define FILES_LIBRARY
 
 #include "define.h"
+#include <dirent.h>
+#include <string>
+#include <vector>
+using namespace std;
 
-// 파일 관련 기능은 이후 단계에서 구현
-void updateList()
+vector<string> getFileList()
 {
-    // Placeholder function for updating song list
+    vector<string> fileList;
+    DIR *dir;
+    struct dirent *diread;
+
+    if ((dir = opendir("./songs/")) != nullptr)
+    {
+        while ((diread = readdir(dir)) != nullptr)
+        {
+            string filename = diread->d_name;
+            if (filename.size() > 3 && filename.substr(filename.size() - 3) == "mp3")
+            {
+                fileList.push_back(filename);
+            }
+        }
+        closedir(dir);
+    }
+    else
+    {
+        perror("opendir");
+    }
+
+    return fileList;
+}
+
+void printFileList()
+{
+    vector<string> files = getFileList();
+    for (const auto &file : files)
+    {
+        cout << file << endl;
+    }
 }
 
 #endif
