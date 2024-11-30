@@ -1,5 +1,3 @@
-// /usr/bin/g++ -std=c++14 -fdiagnostics-color=always -g /Users/latency/Desktop/Dev/C++/CPP2409-P/project/main.cpp -o /Users/latency/Desktop/Dev/C++/CPP2409-P/project/main
-
 #include "define.h"
 #include "files.h"
 
@@ -10,7 +8,7 @@ private:
 
     void border()
     {
-        clear
+        clearScreen
                 horizontalFill
                     horizontalBlank
                         cout
@@ -23,7 +21,7 @@ private:
 
     void listSongs()
     {
-        clear
+        clearScreen
                 horizontalFill
                     cout
             << "*              사용 가능한 노래 목록               *" << endl;
@@ -39,11 +37,11 @@ private:
         {
             for (size_t i = 0; i < files.size(); ++i)
             {
-                cout << i + 1 << ". " << files[i] << endl;
+                cout << i + 1 << ". " << files[i] << " (MP3 파일)" << endl;
             }
         }
 
-        cout << "\n계속하려면 아무 키나 누르세요... " << endl;
+        cout << "\n계속하려면 아무 키나 누르세요..." << endl;
         getchar();
     }
 
@@ -56,7 +54,7 @@ public:
             input = getchar();
             if (input == ' ')
             {
-                clear;
+                clearScreen;
                 exit(0);
             }
             else if (input == 'L' || input == 'l')

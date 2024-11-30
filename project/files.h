@@ -3,8 +3,9 @@
 
 #include "define.h"
 #include <dirent.h>
-#include <string>
 #include <vector>
+#include <string>
+#include <map>
 using namespace std;
 
 vector<string> getFileList()
@@ -31,15 +32,6 @@ vector<string> getFileList()
     }
 
     return fileList;
-}
-
-void printFileList()
-{
-    vector<string> files = getFileList();
-    for (const auto &file : files)
-    {
-        cout << file << endl;
-    }
 }
 
 #endif

@@ -6,8 +6,8 @@
 
 using namespace std;
 
-#define clear system("cls");                          // 화면 초기화
-#define gotoxy(x, y) printf("\033[%d;%dH", (y), (x)); // 커서 위치 지정
+#define clearScreen system("cls");
+#define gotoxy(x, y) printf("\033[%d;%dH", (y), (x));
 #define horizontalFill cout << "****************************************************\n";
 #define horizontalBlank cout << "*                                                  *\n";
 
