@@ -69,13 +69,14 @@ private:
         clearScreen
                 horizontalFill
                     cout
-            << "*                   현재 재생 중:                  *" << endl;
+            << "*               현재 재생 중:              *" << endl;
         horizontalFill
                 cout
             << "제목: " << getSongTitle(currentSongIndex) << endl;
         cout << "아티스트: " << getSongArtist(currentSongIndex) << endl;
         cout << "길이: " << getSongDuration(currentSongIndex) << endl;
         cout << "\n[SPACE] 일시 정지 / 재생    [B] 메뉴로 돌아가기" << endl;
+        cout << "[N] 다음 곡    [P] 이전 곡" << endl;
 
         handlePlayback();
     }
@@ -103,7 +104,41 @@ private:
                 isPaused = false;
                 return;
             }
+            else if (input == 'N' || input == 'n')
+            {
+                nextSong();
+            }
+            else if (input == 'P' || input == 'p')
+            {
+                previousSong();
+            }
         }
+    }
+
+    void nextSong()
+    {
+        if (currentSongIndex < static_cast<int>(songList.size()))
+        {
+            currentSongIndex++;
+        }
+        else
+        {
+            currentSongIndex = 1;
+        }
+        playSong();
+    }
+
+    void previousSong()
+    {
+        if (currentSongIndex > 1)
+        {
+            currentSongIndex--;
+        }
+        else
+        {
+            currentSongIndex = static_cast<int>(songList.size());
+        }
+        playSong();
     }
 
 public:
