@@ -1,14 +1,19 @@
-// /usr/bin/g++ -std=c++17 -fdiagnostics-color=always -g /Users/latency/Desktop/Dev/C++/CPP2409-P/project/main.cpp -o /Users/latency/Desktop/Dev/C++/CPP2409-P/project/main
+// /usr/bin/g++ -std=c++17 -fdiagnostics-color=always -g /Users/latency/Desktop/Dev/C++/CPP2409-P/main.cpp -o /Users/latency/Desktop/Dev/C++/CPP2409-P/main
 
 #include "define.h"
 #include "files.h"
+#include <algorithm>
+#include <random>
 
 class run
 {
 private:
     char input;
     bool isPaused = false;
+    bool isRepeat = false;
     int currentSongIndex = -1;
+    vector<int> shuffledList;
+    bool isShuffle = false;
 
     void border()
     {
@@ -76,7 +81,7 @@ private:
         cout << "아티스트: " << getSongArtist(currentSongIndex) << endl;
         cout << "길이: " << getSongDuration(currentSongIndex) << endl;
         cout << "\n[SPACE] 일시 정지 / 재생    [B] 메뉴로 돌아가기" << endl;
-        cout << "[N] 다음 곡    [P] 이전 곡" << endl;
+        cout << "[N] 다음 곡    [P] 이전 곡    [S] 셔플    [R] 반복 재생" << endl;
 
         handlePlayback();
     }
@@ -112,12 +117,24 @@ private:
             {
                 previousSong();
             }
+            else if (input == 'S' || input == 's')
+            {
+                shufflePlaylist();
+            }
+            else if (input == 'R' || input == 'r')
+            {
+                toggleRepeat();
+            }
         }
     }
 
     void nextSong()
     {
-        if (currentSongIndex < static_cast<int>(songList.size()))
+        if (isShuffle)
+        {
+            currentSongIndex = shuffledList[(find(shuffledList.begin(), shuffledList.end(), currentSongIndex) - shuffledList.begin() + 1) % shuffledList.size()];
+        }
+        else if (currentSongIndex < static_cast<int>(songList.size()))
         {
             currentSongIndex++;
         }
@@ -130,7 +147,11 @@ private:
 
     void previousSong()
     {
-        if (currentSongIndex > 1)
+        if (isShuffle)
+        {
+            currentSongIndex = shuffledList[(find(shuffledList.begin(), shuffledList.end(), currentSongIndex) - shuffledList.begin() - 1 + shuffledList.size()) % shuffledList.size()];
+        }
+        else if (currentSongIndex > 1)
         {
             currentSongIndex--;
         }
@@ -139,6 +160,40 @@ private:
             currentSongIndex = static_cast<int>(songList.size());
         }
         playSong();
+    }
+
+    void shufflePlaylist()
+    {
+        isShuffle = !isShuffle;
+        if (isShuffle)
+        {
+            shuffledList.clear();
+            for (const auto &pair : songList)
+            {
+                shuffledList.push_back(pair.first);
+            }
+            random_device rd;
+            mt19937 g(rd());
+            shuffle(shuffledList.begin(), shuffledList.end(), g);
+            cout << "[셔플 모드 활성화]" << endl;
+        }
+        else
+        {
+            cout << "[셔플 모드 비활성화]" << endl;
+        }
+    }
+
+    void toggleRepeat()
+    {
+        isRepeat = !isRepeat;
+        if (isRepeat)
+        {
+            cout << "[반복 재생 활성화]" << endl;
+        }
+        else
+        {
+            cout << "[반복 재생 비활성화]" << endl;
+        }
     }
 
 public:
