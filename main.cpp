@@ -12,6 +12,7 @@ private:
     bool isPaused = false;
     bool isRepeat = false;
     int currentSongIndex = -1;
+    vector<int> playlist;
     vector<int> shuffledList;
     bool isShuffle = false;
 
@@ -59,6 +60,7 @@ private:
             if (songList.find(choice) != songList.end())
             {
                 currentSongIndex = choice;
+                addToPlaylist(currentSongIndex);
                 playSong();
             }
         }
@@ -69,12 +71,46 @@ private:
         }
     }
 
+    void showPlaylist()
+    {
+        clearScreen
+                horizontalFill
+                    cout
+            << "*               현재 재생 목록              *" << endl;
+        horizontalFill
+
+            if (playlist.empty())
+        {
+            cout << "재생 목록이 비어 있습니다." << endl;
+        }
+        else
+        {
+            for (size_t i = 0; i < playlist.size(); ++i)
+            {
+                int songIndex = playlist[i];
+                cout << i + 1 << ". " << getSongTitle(songIndex) << " (" << getSongArtist(songIndex)
+                     << ") - " << getSongDuration(songIndex) << endl;
+            }
+        }
+
+        cout << "\n[B] 메뉴로 돌아가기" << endl;
+
+        while (true)
+        {
+            input = getchar();
+            if (input == 'B' || input == 'b')
+            {
+                return;
+            }
+        }
+    }
+
     void playSong()
     {
         clearScreen
                 horizontalFill
                     cout
-            << "*               현재 재생 중:              *" << endl;
+            << "*               현재 재생 중:               *" << endl;
         horizontalFill
                 cout
             << "제목: " << getSongTitle(currentSongIndex) << endl;
@@ -82,6 +118,7 @@ private:
         cout << "길이: " << getSongDuration(currentSongIndex) << endl;
         cout << "\n[SPACE] 일시 정지 / 재생    [B] 메뉴로 돌아가기" << endl;
         cout << "[N] 다음 곡    [P] 이전 곡    [S] 셔플    [R] 반복 재생" << endl;
+        cout << "[V] 재생 목록 보기" << endl;
 
         handlePlayback();
     }
@@ -125,6 +162,18 @@ private:
             {
                 toggleRepeat();
             }
+            else if (input == 'V' || input == 'v')
+            {
+                showPlaylist();
+            }
+        }
+    }
+
+    void addToPlaylist(int songIndex)
+    {
+        if (find(playlist.begin(), playlist.end(), songIndex) == playlist.end())
+        {
+            playlist.push_back(songIndex);
         }
     }
 
@@ -134,13 +183,13 @@ private:
         {
             currentSongIndex = shuffledList[(find(shuffledList.begin(), shuffledList.end(), currentSongIndex) - shuffledList.begin() + 1) % shuffledList.size()];
         }
-        else if (currentSongIndex < static_cast<int>(songList.size()))
+        else if (currentSongIndex < static_cast<int>(playlist.size()))
         {
             currentSongIndex++;
         }
         else
         {
-            currentSongIndex = 1;
+            currentSongIndex = playlist[0];
         }
         playSong();
     }
@@ -157,7 +206,7 @@ private:
         }
         else
         {
-            currentSongIndex = static_cast<int>(songList.size());
+            currentSongIndex = playlist.back();
         }
         playSong();
     }
@@ -167,11 +216,7 @@ private:
         isShuffle = !isShuffle;
         if (isShuffle)
         {
-            shuffledList.clear();
-            for (const auto &pair : songList)
-            {
-                shuffledList.push_back(pair.first);
-            }
+            shuffledList = playlist;
             random_device rd;
             mt19937 g(rd());
             shuffle(shuffledList.begin(), shuffledList.end(), g);
