@@ -93,12 +93,22 @@ private:
             }
         }
 
-        cout << "\n[B] 메뉴로 돌아가기" << endl;
+        cout << "\n[D] 노래 삭제    [C] 목록 초기화    [B] 메뉴로 돌아가기" << endl;
 
         while (true)
         {
             input = getchar();
-            if (input == 'B' || input == 'b')
+            if (input == 'D' || input == 'd')
+            {
+                deleteFromPlaylist();
+                return;
+            }
+            else if (input == 'C' || input == 'c')
+            {
+                clearPlaylist();
+                return;
+            }
+            else if (input == 'B' || input == 'b')
             {
                 return;
             }
@@ -175,6 +185,38 @@ private:
         {
             playlist.push_back(songIndex);
         }
+    }
+
+    void deleteFromPlaylist()
+    {
+        clearScreen
+                cout
+            << "*               재생 목록에서 제거               *" << endl;
+        if (playlist.empty())
+        {
+            cout << "재생 목록이 비어 있어 제거할 수 없습니다." << endl;
+            return;
+        }
+
+        cout << "제거할 노래 번호를 입력하세요: " << endl;
+        int songNumber;
+        cin >> songNumber;
+
+        if (songNumber >= 1 && songNumber <= static_cast<int>(playlist.size()))
+        {
+            playlist.erase(playlist.begin() + (songNumber - 1));
+            cout << "선택한 노래가 재생 목록에서 제거되었습니다." << endl;
+        }
+        else
+        {
+            cout << "잘못된 입력입니다." << endl;
+        }
+    }
+
+    void clearPlaylist()
+    {
+        playlist.clear();
+        cout << "재생 목록이 초기화되었습니다." << endl;
     }
 
     void nextSong()
