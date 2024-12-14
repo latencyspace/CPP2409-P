@@ -115,40 +115,60 @@ private:
     }
 
     void playSong(const string& relativePath)
+{
+    // Convert relative path to absolute path
+    string absolutePath = fs::absolute(relativePath).string();
+
+    // Debugging: Print absolute path
+    cout << "Absolute Path: " << absolutePath << endl;
+
+    // Extract song index from the songList
+    auto it = find_if(songList.begin(), songList.end(), [&](const pair<int, string>& entry) {
+        return relativePath.find(entry.second) != string::npos;
+    });
+
+    int songIndex = (it != songList.end()) ? it->first : -1;
+
+    // Debugging: Print songIndex
+    cout << "Song Index: " << songIndex << endl;
+
+    // Check if songIndex is valid
+    if (songIndex != -1)
     {
+        // Print song information
         clearScreen;
         horizontalFill
         cout << "*               Currently Playing:               *" << endl;
         horizontalFill
-        cout << "Title: " << getSongTitle(currentSongIndex) << endl;
-        cout << "Artist: " << getSongArtist(currentSongIndex) << endl;
-        cout << "Duration: " << getSongDuration(currentSongIndex) << endl;
-
-    // Convert relative path to absolute path
-    string absolutePath = fs::absolute(relativePath).string();
-
-    // Construct the command to play the song using FFplay
-    string command = "ffplay -nodisp -autoexit -loglevel quiet \"" + absolutePath + "\"";
-
-    // Execute the command to play the song
-    int result = system(command.c_str());
-    if (result != 0)
-    {
-        cerr << "Error: Failed to play the song." << endl;
-        cerr << "Ensure that FFmpeg (ffplay) is installed and available in the system PATH." << endl;
-    }
-
-    if (result != 0)
-    {
-        cerr << "Error: Failed to play the song." << endl;
-    }
-
+        cout << "Title: " << getSongTitle(songIndex) << endl;
+        cout << "Artist: " << getSongArtist(songIndex) << endl;
+        cout << "Duration: " << getSongDuration(songIndex) << endl;
+        horizontalFill
         cout << "\n[SPACE] Pause / Play    [B] Return to menu" << endl;
         cout << "[N] Next song    [P] Previous song    [S] Shuffle    [R] Repeat" << endl;
         cout << "[V] View playlist" << endl;
-
         handlePlayback();
+
+        // Construct the command to play the song using FFplay
+        string command = "ffplay -nodisp -autoexit -loglevel quiet \"" + absolutePath + "\"";
+
+        // Debugging: Print the command being executed
+        cout << "Executing command: " << command << endl;
+
+        // Execute the command to play the song
+        int result = system(command.c_str());
+        if (result != 0)
+        {
+            cerr << "Error: Failed to play the song." << endl;
+            cerr << "Ensure that FFmpeg (ffplay) is installed and available in the system PATH." << endl;
+        }
     }
+    else
+    {
+        cerr << "Error: Song not found in the list." << endl;
+    }
+}
+
 
 
 
