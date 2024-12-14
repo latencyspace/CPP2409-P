@@ -17,69 +17,69 @@ private:
     void border()
     {
         clearScreen;
-                horizontalFill
-                    horizontalBlank
-                        cout
-            << "*       음악 플레이어에 오신 것을 환영합니다!      *" << endl;
+        horizontalFill
         horizontalBlank
-                horizontalFill
-                    cout
-            << "'L' 키를 눌러 노래 목록을 확인하거나, '스페이스' 키를 눌러 종료하세요." << endl;
+        cout << "*       Welcome to the Music Player!       *" << endl;
+        horizontalBlank
+        horizontalFill
+        cout << "'Press 'L' to view the song list or 'SPACE' to exit." << endl;
     }
 
     void listSongs()
+{
+    clearScreen;
+    horizontalFill
+    cout << "*               Available Song List              *" << endl;
+    horizontalFill
+
+    populateSongDetails(); // Populate song list from the 'songs' folder
+    if (songList.empty())
     {
-        clearScreen;
-                horizontalFill
-                    cout
-            << "*               사용 가능한 노래 목록              *" << endl;
-        horizontalFill
-
-        populateSongDetails();
-        if (songList.empty())
+        cout << "There are currently no songs in the './songs/' directory." << endl;
+    }
+    else
+    {
+        for (const auto& [index, file] : songList)
         {
-            cout << "현재 './songs/' 디렉토리에 노래가 없습니다." << endl;
-        }
-        else
-        {
-            for (const auto &[index, file] : songList)
-            {
-                cout << index << ". " << getSongTitle(index) << " (" << getSongArtist(index)
-                     << ") - " << getSongDuration(index) << endl;
-            }
-        }
-
-        cout << "\n노래를 선택하려면 번호를 입력하세요 (종료: '0')..." << endl;
-        int choice;
-        cin >> choice;
-
-        if (choice >= 1 && choice <= 9)
-        {
-            if (songList.find(choice) != songList.end())
-            {
-                currentSongIndex = choice;
-                addToPlaylist(currentSongIndex);
-                playSong();
-            }
-        }
-        else if (choice == 0)
-        {
-            cout << "프로그램을 종료합니다." << endl;
-            exit(0);
+            cout << index << ". " << getSongTitle(index) << " (" << getSongArtist(index)
+                 << ") - " << getSongDuration(index) << endl;
         }
     }
+
+    cout << "\nEnter the number of the song you want to select (exit: '0')..." << endl;
+    int choice;
+    cin >> choice;
+
+    if (choice >= 1 && choice <= static_cast<int>(songList.size()))
+    {
+        if (songList.find(choice) != songList.end())
+        {
+            string selectedSongPath = "./songs/" + songList[choice];
+            playSong(selectedSongPath); // Play the selected song
+        }
+    }
+    else if (choice == 0)
+    {
+        cout << "Exiting the program." << endl;
+        exit(0);
+    }
+    else
+    {
+        cout << "Invalid selection. Returning to the main menu." << endl;
+    }
+}
+
 
     void showPlaylist()
     {
         clearScreen;
-                horizontalFill
-                    cout
-            << "*               현재 재생 목록              *" << endl;
+        horizontalFill
+        cout << "*               Current Playlist              *" << endl;
         horizontalFill
 
-            if (playlist.empty())
+        if (playlist.empty())
         {
-            cout << "재생 목록이 비어 있습니다." << endl;
+            cout << "The playlist is empty." << endl;
         }
         else
         {
@@ -91,14 +91,17 @@ private:
             }
         }
 
-        cout << "\n[B] 메뉴로 돌아가기" << endl;
-        cout << "\n[D] 노래 삭제    [C] 목록 초기화    [B] 메뉴로 돌아가기" << endl;
+        cout << "\n[B] Return to menu" << endl;
+        cout << "\n[D] Remove song    [C] Clear playlist    [B] Return to menu" << endl;
 
         while (true)
         {
             input = getchar();
             if (input == 'B' || input == 'b')
-            if (input == 'D' || input == 'd')
+            {
+                return;
+            }
+            else if (input == 'D' || input == 'd')
             {
                 deleteFromPlaylist();
                 return;
@@ -108,30 +111,46 @@ private:
                 clearPlaylist();
                 return;
             }
-            else if (input == 'B' || input == 'b')
-            {
-                return;
-            }
         }
     }
 
-    void playSong()
+    void playSong(const string& relativePath)
     {
         clearScreen;
-                horizontalFill
-                    cout
-            << "*               현재 재생 중:               *" << endl;
         horizontalFill
-                cout
-            << "제목: " << getSongTitle(currentSongIndex) << endl;
-        cout << "아티스트: " << getSongArtist(currentSongIndex) << endl;
-        cout << "길이: " << getSongDuration(currentSongIndex) << endl;
-        cout << "\n[SPACE] 일시 정지 / 재생    [B] 메뉴로 돌아가기" << endl;
-        cout << "[N] 다음 곡    [P] 이전 곡    [S] 셔플    [R] 반복 재생" << endl;
-        cout << "[V] 재생 목록 보기" << endl;
+        cout << "*               Currently Playing:               *" << endl;
+        horizontalFill
+        cout << "Title: " << getSongTitle(currentSongIndex) << endl;
+        cout << "Artist: " << getSongArtist(currentSongIndex) << endl;
+        cout << "Duration: " << getSongDuration(currentSongIndex) << endl;
+
+    // Convert relative path to absolute path
+    string absolutePath = fs::absolute(relativePath).string();
+
+    // Construct the command to play the song using FFplay
+    string command = "ffplay -nodisp -autoexit -loglevel quiet \"" + absolutePath + "\"";
+
+    // Execute the command to play the song
+    int result = system(command.c_str());
+    if (result != 0)
+    {
+        cerr << "Error: Failed to play the song." << endl;
+        cerr << "Ensure that FFmpeg (ffplay) is installed and available in the system PATH." << endl;
+    }
+
+    if (result != 0)
+    {
+        cerr << "Error: Failed to play the song." << endl;
+    }
+
+        cout << "\n[SPACE] Pause / Play    [B] Return to menu" << endl;
+        cout << "[N] Next song    [P] Previous song    [S] Shuffle    [R] Repeat" << endl;
+        cout << "[V] View playlist" << endl;
 
         handlePlayback();
     }
+
+
 
     void handlePlayback()
     {
@@ -144,11 +163,11 @@ private:
                 isPaused = !isPaused;
                 if (isPaused)
                 {
-                    cout << "\n[일시 정지됨] 아무 키나 눌러 계속하세요..." << endl;
+                    cout << "\n[Paused] Press any key to continue..." << endl;
                 }
                 else
                 {
-                    cout << "\n[재생 중] 계속 재생..." << endl;
+                    cout << "\n[Playing] Continuing playback..." << endl;
                 }
             }
             else if (input == 'B' || input == 'b')
@@ -190,64 +209,85 @@ private:
     void deleteFromPlaylist()
     {
         clearScreen;
-                cout
-            << "*               재생 목록에서 제거               *" << endl;
+        cout << "*               Remove from Playlist               *" << endl;
         if (playlist.empty())
         {
-            cout << "재생 목록이 비어 있어 제거할 수 없습니다." << endl;
+            cout << "The playlist is empty and cannot be removed." << endl;
             return;
         }
-        cout << "제거할 노래 번호를 입력하세요: " << endl;
+        cout << "Enter the number of the song to remove: " << endl;
         int songNumber;
         cin >> songNumber;
         if (songNumber >= 1 && songNumber <= static_cast<int>(playlist.size()))
         {
             playlist.erase(playlist.begin() + (songNumber - 1));
-            cout << "선택한 노래가 재생 목록에서 제거되었습니다." << endl;
+            cout << "The selected song has been removed from the playlist." << endl;
         }
         else
         {
-            cout << "잘못된 입력입니다." << endl;
+            cout << "Invalid input." << endl;
         }
     }
+
     void clearPlaylist()
     {
         playlist.clear();
-        cout << "재생 목록이 초기화되었습니다." << endl;
-    }
-    void nextSong()
-    {
-        if (isShuffle)
-        {
-            currentSongIndex = shuffledList[(find(shuffledList.begin(), shuffledList.end(), currentSongIndex) - shuffledList.begin() + 1) % shuffledList.size()];
-        }
-        else if (currentSongIndex < static_cast<int>(playlist.size()))
-        {
-            currentSongIndex++;
-        }
-        else
-        {
-            currentSongIndex = playlist[0];
-        }
-        playSong();
+        cout << "The playlist has been cleared." << endl;
     }
 
-    void previousSong()
+    void nextSong()
+{
+    if (isShuffle)
     {
-        if (isShuffle)
+        // Shuffle mode: Move to the next song in shuffledList
+        currentSongIndex = shuffledList[(find(shuffledList.begin(), shuffledList.end(), currentSongIndex) - shuffledList.begin() + 1) % shuffledList.size()];
+    }
+    else
+    {
+        // Non-shuffle mode: Increment index or loop back to the start
+        auto it = find(playlist.begin(), playlist.end(), currentSongIndex);
+        if (it != playlist.end() && ++it != playlist.end())
         {
-            currentSongIndex = shuffledList[(find(shuffledList.begin(), shuffledList.end(), currentSongIndex) - shuffledList.begin() - 1 + shuffledList.size()) % shuffledList.size()];
-        }
-        else if (currentSongIndex > 1)
-        {
-            currentSongIndex--;
+            currentSongIndex = *it;
         }
         else
         {
-            currentSongIndex = playlist.back();
+            currentSongIndex = playlist[0]; // Loop back to the first song
         }
-        playSong();
     }
+
+    // Play the next song
+    string nextSongPath = "./songs/" + songList[currentSongIndex];
+    playSong(nextSongPath);
+}
+
+    void previousSong()
+{
+    if (isShuffle)
+    {
+        // Shuffle mode: Move to the previous song in shuffledList
+        currentSongIndex = shuffledList[(find(shuffledList.begin(), shuffledList.end(), currentSongIndex) - shuffledList.begin() - 1 + shuffledList.size()) % shuffledList.size()];
+    }
+    else
+    {
+        // Non-shuffle mode: Decrement index or loop back to the end
+        auto it = find(playlist.begin(), playlist.end(), currentSongIndex);
+        if (it != playlist.begin())
+        {
+            currentSongIndex = *(--it);
+        }
+        else
+        {
+            currentSongIndex = playlist.back(); // Loop back to the last song
+        }
+    }
+
+    // Play the previous song
+    string prevSongPath = "./songs/" + songList[currentSongIndex];
+    playSong(prevSongPath);
+}
+
+
 
     void shufflePlaylist()
     {
@@ -258,11 +298,11 @@ private:
             random_device rd;
             mt19937 g(rd());
             shuffle(shuffledList.begin(), shuffledList.end(), g);
-            cout << "[셔플 모드 활성화]" << endl;
+            cout << "[Shuffle mode enabled]" << endl;
         }
         else
         {
-            cout << "[셔플 모드 비활성화]" << endl;
+            cout << "[Shuffle mode disabled]" << endl;
         }
     }
 
@@ -271,11 +311,11 @@ private:
         isRepeat = !isRepeat;
         if (isRepeat)
         {
-            cout << "[반복 재생 활성화]" << endl;
+            cout << "[Repeat mode enabled]" << endl;
         }
         else
         {
-            cout << "[반복 재생 비활성화]" << endl;
+            cout << "[Repeat mode disabled]" << endl;
         }
     }
 

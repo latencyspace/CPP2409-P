@@ -6,8 +6,10 @@
 #include <vector>
 #include <map>
 #include <dirent.h>
+#include <filesystem>
 
 using namespace std;
+namespace fs = std::filesystem;
 
 map<int, string> songList;
 map<int, string> songArtist;
