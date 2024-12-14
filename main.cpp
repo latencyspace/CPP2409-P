@@ -2,6 +2,7 @@
 #include "files.h"
 #include <algorithm>
 #include <random>
+#include <thread>
 
 class run
 {
@@ -119,9 +120,6 @@ private:
     // Convert relative path to absolute path
     string absolutePath = fs::absolute(relativePath).string();
 
-    // Debugging: Print absolute path
-    cout << "Absolute Path: " << absolutePath << endl;
-
     // Extract song index from the songList
     auto it = find_if(songList.begin(), songList.end(), [&](const pair<int, string>& entry) {
         return relativePath.find(entry.second) != string::npos;
@@ -129,13 +127,9 @@ private:
 
     int songIndex = (it != songList.end()) ? it->first : -1;
 
-    // Debugging: Print songIndex
-    cout << "Song Index: " << songIndex << endl;
-
-    // Check if songIndex is valid
     if (songIndex != -1)
     {
-        // Print song information
+        // Clear screen and display song information
         clearScreen;
         horizontalFill
         cout << "*               Currently Playing:               *" << endl;
@@ -144,18 +138,14 @@ private:
         cout << "Artist: " << getSongArtist(songIndex) << endl;
         cout << "Duration: " << getSongDuration(songIndex) << endl;
         horizontalFill
+
+        // Add the playback control options at the bottom
         cout << "\n[SPACE] Pause / Play    [B] Return to menu" << endl;
         cout << "[N] Next song    [P] Previous song    [S] Shuffle    [R] Repeat" << endl;
         cout << "[V] View playlist" << endl;
-        handlePlayback();
 
-        // Construct the command to play the song using FFplay
+        // Play song with system command
         string command = "ffplay -nodisp -autoexit -loglevel quiet \"" + absolutePath + "\"";
-
-        // Debugging: Print the command being executed
-        cout << "Executing command: " << command << endl;
-
-        // Execute the command to play the song
         int result = system(command.c_str());
         if (result != 0)
         {
@@ -170,53 +160,110 @@ private:
 }
 
 
+void playSongInBackground(const string& absolutePath)
+{
+    // Construct the command to play the song using FFplay
+    string command = "ffplay -nodisp -autoexit -loglevel quiet \"" + absolutePath + "\"";
 
+    // Execute the command to play the song
+    int result = system(command.c_str());
+    if (result != 0)
+    {
+        cerr << "Error: Failed to play the song." << endl;
+        cerr << "Ensure that FFmpeg (ffplay) is installed and available in the system PATH." << endl;
+    }
+}
 
     void handlePlayback()
+{
+    char input;
+    while (true)
     {
-        while (true)
-        {
-            input = getchar();
+        // cout << "\n[SPACE] Pause / Play    [B] Return to menu" << endl;
+        // cout << "[N] Next song    [P] Previous song    [S] Shuffle    [R] Repeat" << endl;
+        // cout << "[V] View playlist" << endl;
 
-            if (input == ' ')
-            {
-                isPaused = !isPaused;
-                if (isPaused)
-                {
-                    cout << "\n[Paused] Press any key to continue..." << endl;
-                }
-                else
-                {
-                    cout << "\n[Playing] Continuing playback..." << endl;
-                }
-            }
-            else if (input == 'B' || input == 'b')
-            {
-                isPaused = false;
-                return;
-            }
-            else if (input == 'N' || input == 'n')
-            {
-                nextSong();
-            }
-            else if (input == 'P' || input == 'p')
-            {
-                previousSong();
-            }
-            else if (input == 'S' || input == 's')
-            {
-                shufflePlaylist();
-            }
-            else if (input == 'R' || input == 'r')
-            {
-                toggleRepeat();
-            }
-            else if (input == 'V' || input == 'v')
-            {
-                showPlaylist();
-            }
+        input = getchar();  // Get user input
+        if (input == ' ')
+        {
+            // Toggle play/pause logic
+            cout << "[Paused] Press any key to continue..." << endl;
+            getchar(); // Wait for user to press any key to continue
+            cout << "[Playing] Continuing playback..." << endl;
+        }
+        else if (input == 'B' || input == 'b')
+        {
+            // Return to the menu
+            cout << "Returning to menu..." << endl;
+            break;
+        }
+        else if (input == 'N' || input == 'n')
+        {
+            // Next song logic
+            cout << "Playing next song..." << endl;
+        }
+        else if (input == 'P' || input == 'p')
+        {
+            // Previous song logic
+            cout << "Playing previous song..." << endl;
+        }
+        else if (input == 'S' || input == 's')
+        {
+            // Shuffle logic
+            cout << "Shuffling playlist..." << endl;
+        }
+        else if (input == 'R' || input == 'r')
+        {
+            // Repeat logic
+            cout << "Repeating song..." << endl;
+        }
+        else if (input == 'V' || input == 'v')
+        {
+            // View playlist logic
+            cout << "Viewing playlist..." << endl;
         }
     }
+}
+
+void playSongWithInput(const string& relativePath)
+{
+    // Convert relative path to absolute path
+    string absolutePath = fs::absolute(relativePath).string();
+
+    // Extract song index from the songList (Assuming songList and getSongTitle etc. are defined)
+    auto it = find_if(songList.begin(), songList.end(), [&](const pair<int, string>& entry) {
+        return relativePath.find(entry.second) != string::npos;
+    });
+
+    int songIndex = (it != songList.end()) ? it->first : -1;
+
+    if (songIndex != -1)
+    {
+        // Print song information
+        clearScreen;
+        horizontalFill
+        cout << "*               Currently Playing:               *" << endl;
+        horizontalFill
+        cout << "Title: " << getSongTitle(songIndex) << endl;
+        cout << "Artist: " << getSongArtist(songIndex) << endl;
+        cout << "Duration: " << getSongDuration(songIndex) << endl;
+        horizontalFill
+
+        // Start a background thread to play the song
+        thread playThread(&run::playSongInBackground, this, absolutePath);  // Pass 'this' to thread
+
+        // Handle playback input in the main thread
+        handlePlayback();
+
+        // Join the play thread to ensure it finishes execution
+        playThread.join();
+    }
+    else
+    {
+        cerr << "Error: Song not found in the list." << endl;
+    }
+}
+
 
     void addToPlaylist(int songIndex)
     {
